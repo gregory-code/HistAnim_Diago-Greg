@@ -41,7 +41,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 		UInputAction* jumpAction;
 	//This one is handled automatically using the character controller jump
-	////
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+		UInputAction* switchAction;
+	void switchWorld();
 
 protected:
 	// Called when the game starts or when spawned

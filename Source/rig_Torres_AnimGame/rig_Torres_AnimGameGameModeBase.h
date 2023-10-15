@@ -13,5 +13,23 @@ UCLASS()
 class RIG_TORRES_ANIMGAME_API Arig_Torres_AnimGameGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
+
+	public:
+		Arig_Torres_AnimGameGameModeBase();
 	
+		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "World Objects")
+			TArray<AActor*> levelObjects;
+
+		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "World Objects")
+			TArray<FVector> levelObjectsSpawn;
+
+		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "World Objects")
+			bool bWorldIs2D;
+
+		void switchWorld();
+
+	protected:
+		virtual void BeginPlay() override;
+
+
 };

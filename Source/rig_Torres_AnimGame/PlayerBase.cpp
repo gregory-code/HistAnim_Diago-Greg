@@ -5,6 +5,9 @@
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 #include "Components/InputComponent.h"
+#include "rig_Torres_AnimGameGameModeBase.h"
+#include "Kismet/GameplayStatics.h"
+#include "Engine/World.h"
 
 
 // Sets default values
@@ -32,7 +35,6 @@ APlayerBase::APlayerBase()
 	followCamera->bUsePawnControlRotation = false; //gives this control of the cameraBoom
 }
 
-
 void APlayerBase::BeginPlay()
 {
 	Super::BeginPlay();
@@ -45,7 +47,6 @@ void APlayerBase::BeginPlay()
 		}
 	}
 }
-
 
 void APlayerBase::Tick(float DeltaTime)
 {
@@ -61,8 +62,9 @@ void APlayerBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	if (UEnhancedInputComponent* enhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		enhancedInputComponent->BindAction(moveAction, ETriggerEvent::Triggered, this, &APlayerBase::MoveCharacter);
-		enhancedInputComponent->BindAction(jumpAction, ETriggerEvent::Started, this, &APlayerBase::Jump);
 		enhancedInputComponent->BindAction(lookAction, ETriggerEvent::Triggered, this, &APlayerBase::Look);
+		enhancedInputComponent->BindAction(jumpAction, ETriggerEvent::Started, this, &APlayerBase::Jump);
+		enhancedInputComponent->BindAction(switchAction, ETriggerEvent::Started, this, &APlayerBase::switchWorld);
 	}
 }
 
@@ -86,4 +88,14 @@ void APlayerBase::Look(const FInputActionValue& Value)
 
 	AddControllerPitchInput(-lookAxisVector.Y);
 	AddControllerYawInput(lookAxisVector.X);
+}
+
+void APlayerBase::switchWorld()
+{
+	Arig_Torres_AnimGameGameModeBase* customGameMode = Cast<Arig_Torres_AnimGameGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+
+	if(customGameMode)
+	{
+		customGameMode->switchWorld();
+	}
 }
