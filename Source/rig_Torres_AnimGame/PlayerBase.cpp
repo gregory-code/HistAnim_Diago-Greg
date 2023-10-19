@@ -31,6 +31,8 @@ APlayerBase::APlayerBase()
 	followCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	followCamera->SetupAttachment(cameraBoom, USpringArmComponent::SocketName);
 	followCamera->bUsePawnControlRotation = false; //gives this control of the cameraBoom
+	followCamera->OrthoWidth = 2000;
+	followCamera->OrthoNearClipPlane = 300;
 }
 
 void APlayerBase::BeginPlay()
@@ -124,6 +126,8 @@ void APlayerBase::changeCameraState()
 	cameraBoom->bInheritYaw = !bWorldIs2D;
 
 	cameraBoom->TargetArmLength = (bWorldIs2D) ? 800.0f : 300.0f ;
+
+	(bWorldIs2D) ? followCamera->SetProjectionMode(ECameraProjectionMode::Orthographic) : followCamera->SetProjectionMode(ECameraProjectionMode::Perspective);
 }
 
 void APlayerBase::changeRotationState()
