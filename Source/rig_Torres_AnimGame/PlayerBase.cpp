@@ -27,8 +27,6 @@ APlayerBase::APlayerBase()
 
 	cameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	cameraBoom->SetupAttachment(RootComponent);
-	cameraBoom->TargetArmLength = 300.0f;
-	cameraBoom->bUsePawnControlRotation = true; // Let's this control the camera rotation //  can also set this booleon in the blueprint editor
 
 	followCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	followCamera->SetupAttachment(cameraBoom, USpringArmComponent::SocketName);
@@ -38,6 +36,8 @@ APlayerBase::APlayerBase()
 void APlayerBase::BeginPlay()
 {
 	Super::BeginPlay();
+
+	changeCameraState();
 	
 	if (APlayerController* playerController = Cast<APlayerController>(GetController()))
 	{
@@ -52,6 +52,11 @@ void APlayerBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (bWorldIs2D)
+	{
+		FVector lerp = FMath::Lerp(GetActorLocation(), FVector(0, GetActorLocation().Y, GetActorLocation().Z), 5 * DeltaTime);
+		SetActorLocation(lerp);
+	}
 }
 
 
@@ -72,13 +77,21 @@ void APlayerBase::MoveCharacter(const FInputActionValue& Value)
 {
 	const FVector2D moveVector = Value.Get<FVector2D>();
 
+	//if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("X: %f"), moveVector.X));
+
+	if (bWorldIs2D)
+	{
+		SetActorRotation((moveVector.X > 0) ? FRotator(0, 90, 0) : FRotator(0, -90, 0));
+		Controller->SetControlRotation(FRotator(0, 0, 0));
+	}
+
 	const FRotator rotation = Controller->GetControlRotation();
 	const FRotator yawRotation(0.0f, rotation.Yaw, 0.0f);
 
 	const FVector forwardDirection = FRotationMatrix(yawRotation).GetUnitAxis(EAxis::X);
 	const FVector rightDirection = FRotationMatrix(yawRotation).GetUnitAxis(EAxis::Y);
 
-	AddMovementInput(forwardDirection, moveVector.Y);
+	if (!bWorldIs2D) AddMovementInput(forwardDirection, moveVector.Y);
 	AddMovementInput(rightDirection, moveVector.X);
 }
 
@@ -97,5 +110,33 @@ void APlayerBase::switchWorld()
 	if(customGameMode)
 	{
 		customGameMode->switchWorld();
+		bWorldIs2D = !bWorldIs2D;
+		changeCameraState();
+		changeRotationState();
+	}
+}
+
+void APlayerBase::changeCameraState()
+{
+	cameraBoom->bUsePawnControlRotation = !bWorldIs2D; // Let's this control the camera rotation //  can also set this booleon in the blueprint editor
+	cameraBoom->bInheritPitch = !bWorldIs2D;
+	cameraBoom->bInheritRoll = !bWorldIs2D;
+	cameraBoom->bInheritYaw = !bWorldIs2D;
+
+	cameraBoom->TargetArmLength = (bWorldIs2D) ? 800.0f : 300.0f ;
+}
+
+void APlayerBase::changeRotationState()
+{
+	if (bWorldIs2D)
+	{
+		FRotator CurrentRotation = GetActorRotation();
+		float CurrentZRotation = CurrentRotation.Yaw;
+
+		float differenceFoward = FMath::Abs(90 - CurrentZRotation);
+		float differenceBack = FMath::Abs(-90 - CurrentZRotation);
+
+		float rotate = (differenceFoward < differenceBack) ? 90 : - 90;
+		SetActorRotation(FRotator(0.0f, rotate, 0.0f));
 	}
 }

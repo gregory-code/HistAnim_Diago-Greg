@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "Engine/PostProcessVolume.h"
 #include "rig_Torres_AnimGameGameModeBase.generated.h"
 
 /**
@@ -19,6 +20,9 @@ class RIG_TORRES_ANIMGAME_API Arig_Torres_AnimGameGameModeBase : public AGameMod
 	
 		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "World Objects")
 			TArray<AActor*> levelObjects;
+
+		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "World Objects")
+			APostProcessVolume* levelPostProcess;
 
 		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "World Objects")
 			TArray<FVector> levelObjectsSpawn;

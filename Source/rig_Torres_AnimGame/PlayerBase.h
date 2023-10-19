@@ -45,6 +45,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 		UInputAction* switchAction;
 	void switchWorld();
+	void changeCameraState();
+	void changeRotationState();
+	bool bWorldIs2D	{false};
 
 protected:
 	// Called when the game starts or when spawned
