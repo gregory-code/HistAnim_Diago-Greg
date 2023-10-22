@@ -9,8 +9,8 @@
 #include "Math/Vector.h"
 #include "enemyControllerAI.h"
 #include "PlayerBase.h"
-#include "EngineUtils.h"
 #include "Engine/World.h"
+#include "EngineUtils.h"
 #include "NavMesh/NavMeshBoundsVolume.h"
 #include "Animation/AnimMontage.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -191,6 +191,31 @@ void AEnemyBase::moveOnPath(FVector location)
 
 void AEnemyBase::deathPoof()
 {
+	float randomNumOfFruits = FMath::FRandRange(0.0f, 5);
+
+	for (int i = 0; i < randomNumOfFruits; ++i)
+	{
+		float ranFruits = FMath::FRandRange(0.0f, food_BluePrints.Num());
+
+		if (food_BluePrints.IsValidIndex(ranFruits))
+		{
+			AActor* spawnedFood = GetWorld()->SpawnActor<AActor>(food_BluePrints[ranFruits]->GetClass(), GetActorLocation(), GetActorRotation());
+
+			AfoodBase* foodBase = Cast<AfoodBase>(spawnedFood);
+			if (foodBase)
+			{
+				if(worldIs2D) foodBase->switchWorld();
+				foodBase->enablePhysics();
+			}
+			
+			UPrimitiveComponent* spawnedFoodComponent = Cast<UPrimitiveComponent>(spawnedFood);
+			if (spawnedFoodComponent)
+			{
+				spawnedFoodComponent->AddImpulse(FMath::VRand() * 50, NAME_None, true);
+			}
+		}
+	}
+
 	Destroy();
 }
 

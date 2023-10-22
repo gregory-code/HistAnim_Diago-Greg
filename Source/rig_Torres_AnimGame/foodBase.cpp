@@ -11,14 +11,17 @@ AfoodBase::AfoodBase()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	grabBox = CreateDefaultSubobject<UBoxComponent>(TEXT("GrabBox"));
-	RootComponent = grabBox;
-	grabBox->SetBoxExtent(FVector(32,32, 32));
-
 	pickupMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Pickup Mesh"));
 	pickupMesh->SetupAttachment(GetRootComponent());
 	pickupMesh->SetSimulatePhysics(false);
+	pickupMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	pickupMesh->SetWorldScale3D(FVector(5.5f, 5.5f, 5.5f));
+
+	RootComponent = pickupMesh;
+	grabBox = CreateDefaultSubobject<UBoxComponent>(TEXT("GrabBox"));
+	grabBox->SetBoxExtent(FVector(32,32, 32));
+	grabBox->AttachToComponent(pickupMesh, FAttachmentTransformRules::KeepRelativeTransform);
+
 
 }
 
@@ -49,6 +52,7 @@ void AfoodBase::Tick(float DeltaTime)
 	}
 	else
 	{
+		if (isActive) return;
 		FRotator spinTheBanana = GetActorRotation();
 		spinTheBanana.Yaw += 1;
 		SetActorRotation(spinTheBanana);
@@ -66,20 +70,22 @@ void AfoodBase::OnOverlapBegin(AActor* overlappedActor, AActor* otherActor)
 
 void AfoodBase::enablePhysics()
 {
+	//grabBox->SetSimulatePhysics(true);
+	grabBox->AttachToComponent(pickupMesh, FAttachmentTransformRules::KeepRelativeTransform);
+	grabBox->SetBoxExtent(FVector(12, 12, 12));
+	isActive = true;
 	pickupMesh->SetSimulatePhysics(true);
+	pickupMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 }
 
 void AfoodBase::switchWorld()
 {
 	bWorldIs2D = !bWorldIs2D;
 
+	SetActorRotation(startingRotation);
+
 	if (bWorldIs2D == false)
 	{
 		SetActorLocation(startingLocation);
-		SetActorRotation(startingRotation);
-	}
-	else
-	{
-		SetActorRotation(FRotator(90.0f, 0, 0.0f));
 	}
 }

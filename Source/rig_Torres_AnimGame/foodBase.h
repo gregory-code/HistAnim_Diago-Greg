@@ -36,6 +36,7 @@ protected:
 	FVector startingLocation;
 	FRotator startingRotation;
 	bool bWorldIs2D;
+	bool isActive;
 
 
 public:	

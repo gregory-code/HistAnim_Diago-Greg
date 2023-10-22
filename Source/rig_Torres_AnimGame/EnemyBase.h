@@ -7,6 +7,7 @@
 #include "Components/BoxComponent.h"
 #include "AIController.h"
 #include "NavigationSystem.h"
+#include "foodBase.h"
 #include "EnemyBase.generated.h"
 
 UCLASS()
@@ -34,6 +35,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
 		UAnimMontage* M_death;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
+		TArray<AActor*> food_BluePrints;
 
 
 protected:
