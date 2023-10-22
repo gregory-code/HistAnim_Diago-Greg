@@ -9,8 +9,10 @@
 #include "InputAction.h"
 #include "playerUI.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/StaticMeshComponent.h"
 #include "Components/Widget.h"
 #include "Components/CanvasPanelSlot.h"
+#include "Components/SceneCaptureComponent2D.h"
 #include "Components/Overlayslot.h"
 #include "Components/InputComponent.h"
 //
@@ -42,6 +44,12 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 		UCameraComponent* followCamera;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+		USceneCaptureComponent2D* sceneCaptureComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+		UStaticMeshComponent* planeMesh;
 
 	//Inputs
 	UPROPERTY(EditAnywhere, Category = "Input")

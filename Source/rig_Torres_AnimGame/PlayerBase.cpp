@@ -34,6 +34,7 @@ APlayerBase::APlayerBase()
 	followCamera->bUsePawnControlRotation = false; //gives this control of the cameraBoom
 	followCamera->OrthoWidth = 2000;
 	followCamera->OrthoNearClipPlane = 300;
+
 }
 
 void APlayerBase::BeginPlay()
@@ -64,6 +65,11 @@ void APlayerBase::BeginPlay()
 void APlayerBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	FRotator CurrentRotation = GetActorRotation();
+	CurrentRotation.Pitch = 0;
+	CurrentRotation.Roll = 0;
+	SetActorRotation(CurrentRotation);
 
 	if (bWorldIs2D)
 	{
@@ -97,6 +103,8 @@ void APlayerBase::MoveCharacter(const FInputActionValue& Value)
 
 	//if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("X: %f"), moveVector.X));
 
+	MakeNoise(0.5f, Controller->GetPawn(), GetActorLocation());
+
 	if (bWorldIs2D)
 	{
 		SetActorRotation((moveVector.X > 0) ? FRotator(0, 90, 0) : FRotator(0, -90, 0));
@@ -123,6 +131,8 @@ void APlayerBase::Look(const FInputActionValue& Value)
 
 void APlayerBase::switchWorld()
 {
+	if (GetCharacterMovement()->IsFalling()) return;
+
 	Arig_Torres_AnimGameGameModeBase* customGameMode = Cast<Arig_Torres_AnimGameGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
 
 	if(customGameMode)
@@ -168,13 +178,15 @@ void APlayerBase::bounceOffEnemy()
 	PlayAnimMontage(M_jump, 1, NAME_None);
 
 	FVector jumpDirection = FVector(0, 0, 1);
-	float jumpVelocity = 1200;
+	float jumpVelocity = 950;
 
 	LaunchCharacter(jumpDirection * jumpVelocity, false, false);
 }
 
 void APlayerBase::addPoints(int pointsToAdd)
 {
+	if (playerUI == nullptr) return;
+
 	points += pointsToAdd;
 	playerUI->coinText->SetText(FText::FromString("Points: " + FString::FromInt(points)));
 

@@ -22,9 +22,9 @@ AenemyControllerAI::AenemyControllerAI()
 	aiPerception = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIPerception"));
 
 	aiSight = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("AISight"));
-	aiSight->SightRadius = 500;
-	aiSight->LoseSightRadius = 650;
-	aiSight->PeripheralVisionAngleDegrees = 70;
+	aiSight->SightRadius = 530;
+	aiSight->LoseSightRadius = 700;
+	aiSight->PeripheralVisionAngleDegrees = 90;
 	aiSight->DetectionByAffiliation.bDetectEnemies = true;
 	aiSight->DetectionByAffiliation.bDetectFriendlies = true;
 	aiSight->DetectionByAffiliation.bDetectNeutrals = true;
