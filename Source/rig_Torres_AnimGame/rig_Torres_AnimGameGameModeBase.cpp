@@ -6,6 +6,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Engine/PostProcessVolume.h"
 #include "EnemyBase.h"
+#include "foodBase.h"
 #include "Engine/World.h"
 
 Arig_Torres_AnimGameGameModeBase::Arig_Torres_AnimGameGameModeBase()
@@ -27,8 +28,6 @@ void Arig_Torres_AnimGameGameModeBase::BeginPlay()
 		if (levelPostProcess) levelPostProcess->bEnabled = false;
 	}
 
-	UGameplayStatics::GetAllActorsWithTag(GetWorld(), "Enemy", levelEnemies);
-
 	UGameplayStatics::GetAllActorsWithTag(GetWorld(), "object", levelObjects);
 	for (AActor* Object : levelObjects)
 	{
@@ -43,11 +42,20 @@ void Arig_Torres_AnimGameGameModeBase::switchWorld()
 	if(levelPostProcess) levelPostProcess->bEnabled = bWorldIs2D;
 	if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Switched"));
 
-
+	TArray<AActor*> levelEnemies;
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), "Enemy", levelEnemies);
 	for (AActor* enemy : levelEnemies)
 	{
 		AEnemyBase* enemyBase = Cast<AEnemyBase>(enemy);
 		if (enemyBase) enemyBase->switchWorld();
+	}
+
+	TArray<AActor*> levelFood;
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), "Food", levelFood);
+	for (AActor* food : levelFood)
+	{
+		AfoodBase* foodBase = Cast<AfoodBase>(food);
+		if (foodBase) foodBase->switchWorld();
 	}
 
 	for (int i = 0; i < levelObjects.Num(); ++i)

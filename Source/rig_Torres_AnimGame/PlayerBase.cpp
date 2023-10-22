@@ -7,6 +7,7 @@
 #include "Components/InputComponent.h"
 #include "rig_Torres_AnimGameGameModeBase.h"
 #include "Kismet/GameplayStatics.h"
+#include "playerUI.h"
 #include "Engine/World.h"
 
 
@@ -39,6 +40,8 @@ void APlayerBase::BeginPlay()
 {
 	Super::BeginPlay();
 
+	points = 0;
+
 	changeCameraState();
 	
 	if (APlayerController* playerController = Cast<APlayerController>(GetController()))
@@ -48,6 +51,14 @@ void APlayerBase::BeginPlay()
 			subsystem->AddMappingContext(mappingContext, 0);
 		}
 	}
+	
+	if (!playerUI) return;
+	playerUI->AddToViewport();
+
+	playerUI->coinText->SetText(FText::FromString("Points: " + FString::FromInt(points)));
+
+	menuOverlaySlot = Cast<UCanvasPanelSlot>(playerUI->menuOverlay->Slot);
+	pointsOverlaySlot = Cast<UCanvasPanelSlot>(playerUI->pointsOverlay->Slot);
 }
 
 void APlayerBase::Tick(float DeltaTime)
@@ -59,6 +70,11 @@ void APlayerBase::Tick(float DeltaTime)
 		FVector lerp = FMath::Lerp(GetActorLocation(), FVector(0, GetActorLocation().Y, GetActorLocation().Z), 5 * DeltaTime);
 		SetActorLocation(lerp);
 	}
+
+	if (pointsOverlaySlot == nullptr) return;
+
+	int pointsLerp = (bGainedPoints) ? FMath::Lerp(pointsOverlaySlot->GetPosition().Y, 60, 12 * DeltaTime) : FMath::Lerp(pointsOverlaySlot->GetPosition().Y, 100, 12 * DeltaTime);
+	pointsOverlaySlot->SetPosition(FVector2D(100, pointsLerp));
 }
 
 
@@ -147,10 +163,27 @@ void APlayerBase::changeRotationState()
 
 void APlayerBase::bounceOffEnemy()
 {
+	addPoints(1);
+
 	PlayAnimMontage(M_jump, 1, NAME_None);
 
 	FVector jumpDirection = FVector(0, 0, 1);
 	float jumpVelocity = 1200;
 
 	LaunchCharacter(jumpDirection * jumpVelocity, false, false);
+}
+
+void APlayerBase::addPoints(int pointsToAdd)
+{
+	points += pointsToAdd;
+	playerUI->coinText->SetText(FText::FromString("Points: " + FString::FromInt(points)));
+
+	bGainedPoints = true;
+
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &APlayerBase::finishedAddingPoints, 0.2f, false);
+}
+
+void APlayerBase::finishedAddingPoints()
+{
+	bGainedPoints = false;
 }

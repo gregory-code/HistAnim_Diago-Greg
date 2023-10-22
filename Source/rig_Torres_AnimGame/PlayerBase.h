@@ -7,6 +7,11 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "InputAction.h"
+#include "playerUI.h"
+#include "Blueprint/UserWidget.h"
+#include "Components/Widget.h"
+#include "Components/CanvasPanelSlot.h"
+#include "Components/Overlayslot.h"
 #include "Components/InputComponent.h"
 //
 #include "PlayerBase.generated.h"
@@ -19,6 +24,15 @@ class RIG_TORRES_ANIMGAME_API APlayerBase : public ACharacter
 public:
 	// Sets default values
 	APlayerBase();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+		UplayerUI* playerUI;
+
+	UPROPERTY(BlueprintReadWrite, Category = "UI")
+		UCanvasPanelSlot* menuOverlaySlot;
+
+	UPROPERTY(BlueprintReadWrite, Category = "UI")
+		UCanvasPanelSlot* pointsOverlaySlot;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
 		UAnimMontage* M_jump;
@@ -51,11 +65,18 @@ public:
 	void changeCameraState();
 	void changeRotationState();
 	void bounceOffEnemy();
+	void addPoints(int pointsToAdd);
+	void finishedAddingPoints();
 	bool bWorldIs2D	{false};
+
+	int points;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	FTimerHandle TimerHandle;
+	bool bGainedPoints {false};
 
 public:	
 	// Called every frame

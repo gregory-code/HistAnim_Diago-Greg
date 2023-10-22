@@ -21,7 +21,10 @@ class RIG_TORRES_ANIMGAME_API UplayerUI : public UUserWidget
 public:
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget), Category = "Widget Component")
-		UOverlay* UIOverlay;
+		UOverlay* menuOverlay;
+
+	UPROPERTY(EditAnywhere, meta = (BindWidget), Category = "Widget Component")
+		UOverlay* pointsOverlay;
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget), Category = "Widget Component")
 		UImage* coinImage;
