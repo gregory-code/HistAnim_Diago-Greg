@@ -144,3 +144,13 @@ void APlayerBase::changeRotationState()
 		SetActorRotation(FRotator(0.0f, rotate, 0.0f));
 	}
 }
+
+void APlayerBase::bounceOffEnemy()
+{
+	PlayAnimMontage(M_jump, 1, NAME_None);
+
+	FVector jumpDirection = FVector(0, 0, 1);
+	float jumpVelocity = 1200;
+
+	LaunchCharacter(jumpDirection * jumpVelocity, false, false);
+}

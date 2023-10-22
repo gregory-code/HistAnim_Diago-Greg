@@ -20,6 +20,9 @@ public:
 	// Sets default values
 	APlayerBase();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
+		UAnimMontage* M_jump;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 		USpringArmComponent* cameraBoom;
 
@@ -47,6 +50,7 @@ public:
 	void switchWorld();
 	void changeCameraState();
 	void changeRotationState();
+	void bounceOffEnemy();
 	bool bWorldIs2D	{false};
 
 protected:

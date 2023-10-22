@@ -22,6 +22,9 @@ class RIG_TORRES_ANIMGAME_API Arig_Torres_AnimGameGameModeBase : public AGameMod
 			TArray<AActor*> levelObjects;
 
 		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "World Objects")
+			TArray<AActor*> levelEnemies;
+
+		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "World Objects")
 			APostProcessVolume* levelPostProcess;
 
 		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "World Objects")
