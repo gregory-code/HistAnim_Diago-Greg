@@ -191,7 +191,7 @@ void AEnemyBase::moveOnPath(FVector location)
 
 void AEnemyBase::deathPoof()
 {
-	float randomNumOfFruits = FMath::FRandRange(0.0f, 5);
+	float randomNumOfFruits = FMath::FRandRange(40.0f, 60.0f);
 
 	for (int i = 0; i < randomNumOfFruits; ++i)
 	{

@@ -19,7 +19,7 @@ AfoodBase::AfoodBase()
 
 	RootComponent = pickupMesh;
 	grabBox = CreateDefaultSubobject<UBoxComponent>(TEXT("GrabBox"));
-	grabBox->SetBoxExtent(FVector(32,32, 32));
+	grabBox->SetBoxExtent(FVector(5, 5, 5));
 	grabBox->AttachToComponent(pickupMesh, FAttachmentTransformRules::KeepRelativeTransform);
 
 
@@ -52,7 +52,12 @@ void AfoodBase::Tick(float DeltaTime)
 	}
 	else
 	{
-		if (isActive) return;
+
+		if (isActive)
+		{
+			startingLocation = GetActorLocation();
+			return;
+		}
 		FRotator spinTheBanana = GetActorRotation();
 		spinTheBanana.Yaw += 1;
 		SetActorRotation(spinTheBanana);
