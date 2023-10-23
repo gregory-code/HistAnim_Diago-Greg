@@ -13,6 +13,7 @@
 #include "Components/Widget.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Components/SceneCaptureComponent2D.h"
+#include "Engine/Texture2D.h"
 #include "Components/Overlayslot.h"
 #include "Components/InputComponent.h"
 //
@@ -51,6 +52,21 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 		UStaticMeshComponent* planeMesh;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spawn")
+		FVector spawnPoint;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "PNGs")
+		UTexture2D* lifeIcon;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "PNGs")
+		UTexture2D* lifeIconBlackandWhite;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "PNGs")
+		UTexture2D* foodIcon;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "PNGs")
+		UTexture2D* foodIconBlackandWhite;
+
 	//Inputs
 	UPROPERTY(EditAnywhere, Category = "Input")
 		UInputMappingContext* mappingContext;
@@ -75,6 +91,9 @@ public:
 	void bounceOffEnemy();
 	void addPoints(int pointsToAdd);
 	void finishedAddingPoints();
+	void respawn();
+	void setImage(UTexture2D* desiredTexture, UImage* ImageToSet);
+
 	bool bWorldIs2D	{false};
 
 	int points;

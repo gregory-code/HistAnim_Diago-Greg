@@ -7,6 +7,8 @@
 #include "Components/InputComponent.h"
 #include "rig_Torres_AnimGameGameModeBase.h"
 #include "Kismet/GameplayStatics.h"
+#include "Styling/SlateBrush.h"
+#include "Engine/Texture2D.h"
 #include "playerUI.h"
 #include "Engine/World.h"
 
@@ -43,6 +45,16 @@ void APlayerBase::BeginPlay()
 
 	points = 0;
 
+	if (!playerUI) return;
+	playerUI->AddToViewport();
+
+	playerUI->coinText->SetText(FText::FromString("Points: " + FString::FromInt(points)));
+
+	menuOverlaySlot = Cast<UCanvasPanelSlot>(playerUI->menuOverlay->Slot);
+	pointsOverlaySlot = Cast<UCanvasPanelSlot>(playerUI->pointsOverlay->Slot);
+
+	spawnPoint = GetActorLocation();
+
 	changeCameraState();
 	
 	if (APlayerController* playerController = Cast<APlayerController>(GetController()))
@@ -52,14 +64,6 @@ void APlayerBase::BeginPlay()
 			subsystem->AddMappingContext(mappingContext, 0);
 		}
 	}
-	
-	if (!playerUI) return;
-	playerUI->AddToViewport();
-
-	playerUI->coinText->SetText(FText::FromString("Points: " + FString::FromInt(points)));
-
-	menuOverlaySlot = Cast<UCanvasPanelSlot>(playerUI->menuOverlay->Slot);
-	pointsOverlaySlot = Cast<UCanvasPanelSlot>(playerUI->pointsOverlay->Slot);
 }
 
 void APlayerBase::Tick(float DeltaTime)
@@ -79,7 +83,7 @@ void APlayerBase::Tick(float DeltaTime)
 
 	if (pointsOverlaySlot == nullptr) return;
 
-	int pointsLerp = (bGainedPoints) ? FMath::Lerp(pointsOverlaySlot->GetPosition().Y, 60, 12 * DeltaTime) : FMath::Lerp(pointsOverlaySlot->GetPosition().Y, 100, 12 * DeltaTime);
+	int pointsLerp = (bGainedPoints) ? FMath::Lerp(pointsOverlaySlot->GetPosition().Y, 210, 12 * DeltaTime) : FMath::Lerp(pointsOverlaySlot->GetPosition().Y, 250, 12 * DeltaTime);
 	pointsOverlaySlot->SetPosition(FVector2D(100, pointsLerp));
 }
 
@@ -146,6 +150,23 @@ void APlayerBase::switchWorld()
 
 void APlayerBase::changeCameraState()
 {
+	if (bWorldIs2D)
+	{
+		setImage(lifeIconBlackandWhite, playerUI->livesImage1);
+		setImage(lifeIconBlackandWhite, playerUI->livesImage2);
+		setImage(lifeIconBlackandWhite, playerUI->livesImage3);
+
+		setImage(foodIconBlackandWhite, playerUI->coinImage);
+	}
+	else 
+	{
+		setImage(lifeIcon, playerUI->livesImage1);
+		setImage(lifeIcon, playerUI->livesImage2);
+		setImage(lifeIcon, playerUI->livesImage3);
+
+		setImage(foodIcon, playerUI->coinImage);
+	}
+
 	cameraBoom->bUsePawnControlRotation = !bWorldIs2D; // Let's this control the camera rotation //  can also set this booleon in the blueprint editor
 	cameraBoom->bInheritPitch = !bWorldIs2D;
 	cameraBoom->bInheritRoll = !bWorldIs2D;
@@ -198,4 +219,18 @@ void APlayerBase::addPoints(int pointsToAdd)
 void APlayerBase::finishedAddingPoints()
 {
 	bGainedPoints = false;
+}
+
+void APlayerBase::respawn()
+{
+	SetActorLocation(spawnPoint);
+}
+
+void APlayerBase::setImage(UTexture2D* desiredTexture, UImage* ImageToSet)
+{
+	if (playerUI == nullptr) return;
+	FSlateBrush brush;
+	brush.SetResourceObject(desiredTexture);
+	brush.SetImageSize(FVector2D(120, 120));
+	ImageToSet->SetBrush(brush);
 }

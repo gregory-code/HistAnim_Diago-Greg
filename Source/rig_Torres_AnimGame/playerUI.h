@@ -32,4 +32,15 @@ public:
 	UPROPERTY(EditAnywhere, meta = (BindWidget), Category = "Widget Component")
 		UTextBlock* coinText;
 
+	UPROPERTY(EditAnywhere, meta = (BindWidget), Category = "Widget Component")
+		UOverlay* livesOverlay;
+
+	UPROPERTY(EditAnywhere, meta = (BindWidget), Category = "Widget Component")
+		UImage* livesImage1;
+
+	UPROPERTY(EditAnywhere, meta = (BindWidget), Category = "Widget Component")
+		UImage* livesImage2;
+
+	UPROPERTY(EditAnywhere, meta = (BindWidget), Category = "Widget Component")
+		UImage* livesImage3;
 };
