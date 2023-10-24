@@ -127,6 +127,7 @@ void AEnemyBase::OnOverlapBegin(AActor* overlappedActor, AActor* otherActor)
 	else 
 	{
 		if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Player has died"));
+		player->death();
 	}
 }
 

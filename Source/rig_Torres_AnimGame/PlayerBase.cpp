@@ -52,6 +52,7 @@ void APlayerBase::BeginPlay()
 
 	menuOverlaySlot = Cast<UCanvasPanelSlot>(playerUI->menuOverlay->Slot);
 	pointsOverlaySlot = Cast<UCanvasPanelSlot>(playerUI->pointsOverlay->Slot);
+	respawnOverlaySlot = Cast<UCanvasPanelSlot>(playerUI->respawnOverlay->Slot);
 
 	spawnPoint = GetActorLocation();
 
@@ -70,6 +71,14 @@ void APlayerBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (pointsOverlaySlot == nullptr) return;
+
+	int respawnLerp = (bRespawnTransition) ? FMath::Lerp(respawnOverlaySlot->GetPosition().X, 0, 16 * DeltaTime) : FMath::Lerp(respawnOverlaySlot->GetPosition().X, -2000, 16 * DeltaTime);
+	if (bExitScreenRight) respawnLerp = FMath::Lerp(respawnOverlaySlot->GetPosition().X, 2000, 12 * DeltaTime);
+	respawnOverlaySlot->SetPosition(FVector2D(respawnLerp, 0));
+	
+	if (bDying) return;
+
 	FRotator CurrentRotation = GetActorRotation();
 	CurrentRotation.Pitch = 0;
 	CurrentRotation.Roll = 0;
@@ -81,10 +90,9 @@ void APlayerBase::Tick(float DeltaTime)
 		SetActorLocation(lerp);
 	}
 
-	if (pointsOverlaySlot == nullptr) return;
-
 	int pointsLerp = (bGainedPoints) ? FMath::Lerp(pointsOverlaySlot->GetPosition().Y, 210, 12 * DeltaTime) : FMath::Lerp(pointsOverlaySlot->GetPosition().Y, 250, 12 * DeltaTime);
 	pointsOverlaySlot->SetPosition(FVector2D(100, pointsLerp));
+
 }
 
 
@@ -103,6 +111,8 @@ void APlayerBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 void APlayerBase::MoveCharacter(const FInputActionValue& Value)
 {
+	if (bDying) return;
+
 	const FVector2D moveVector = Value.Get<FVector2D>();
 
 	//if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("X: %f"), moveVector.X));
@@ -135,6 +145,7 @@ void APlayerBase::Look(const FInputActionValue& Value)
 
 void APlayerBase::switchWorld()
 {
+	if (bDying) return;
 	if (GetCharacterMovement()->IsFalling()) return;
 
 	Arig_Torres_AnimGameGameModeBase* customGameMode = Cast<Arig_Torres_AnimGameGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
@@ -152,17 +163,21 @@ void APlayerBase::changeCameraState()
 {
 	if (bWorldIs2D)
 	{
-		setImage(lifeIconBlackandWhite, playerUI->livesImage1);
-		setImage(lifeIconBlackandWhite, playerUI->livesImage2);
-		setImage(lifeIconBlackandWhite, playerUI->livesImage3);
+		if(livesRemaining >= 1) setImage(lifeIconBlackandWhite, playerUI->livesImage1);
+		if (livesRemaining >= 2) setImage(lifeIconBlackandWhite, playerUI->livesImage2);
+		if (livesRemaining >= 3) setImage(lifeIconBlackandWhite, playerUI->livesImage3);
+
+		setImage(respawnBlackandWhiteTransition, playerUI->respawnImage);
 
 		setImage(foodIconBlackandWhite, playerUI->coinImage);
 	}
 	else 
 	{
-		setImage(lifeIcon, playerUI->livesImage1);
-		setImage(lifeIcon, playerUI->livesImage2);
-		setImage(lifeIcon, playerUI->livesImage3);
+		if (livesRemaining >= 1)setImage(lifeIcon, playerUI->livesImage1);
+		if (livesRemaining >= 2) setImage(lifeIcon, playerUI->livesImage2);
+		if (livesRemaining >= 3) setImage(lifeIcon, playerUI->livesImage3);
+
+		setImage(respawnTransition, playerUI->respawnImage);
 
 		setImage(foodIcon, playerUI->coinImage);
 	}
@@ -221,9 +236,70 @@ void APlayerBase::finishedAddingPoints()
 	bGainedPoints = false;
 }
 
+void APlayerBase::death()
+{
+	if (bDying) return;
+
+	bDying = true;
+
+	PlayAnimMontage(M_death, 1, NAME_None);
+
+	USkeletalMeshComponent* skeletalMeshComponent = this->FindComponentByClass<USkeletalMeshComponent>();
+	UAnimInstance* animInstance = skeletalMeshComponent->GetAnimInstance();
+	UAnimMontage* currentMontage = animInstance->GetCurrentActiveMontage();
+	float montageLength = currentMontage->GetPlayLength();
+	montageLength -= 0.4f;
+
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &APlayerBase::respawn, montageLength, false);
+}
+
 void APlayerBase::respawn()
 {
+	if (playerUI == nullptr) return;
+
+	respawnOverlaySlot->SetPosition(FVector2D(-2000, 0));
+	bRespawnTransition = true;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &APlayerBase::hideScreen, 1, false);
+}
+
+void APlayerBase::hideScreen()
+{
+	loseLife();
+	bExitScreenRight = true;
 	SetActorLocation(spawnPoint);
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &APlayerBase::finishRespawn, 0.5f, false);
+}
+
+void APlayerBase::finishRespawn()
+{
+	bDying = false;
+	respawnOverlaySlot->SetPosition(FVector2D(-2000, 0));
+	bRespawnTransition = false;
+	bExitScreenRight = false;
+}
+
+void APlayerBase::loseLife()
+{
+	switch (livesRemaining)
+	{
+	case 3:
+		setImage(transparent, playerUI->livesImage3);
+		break;
+
+	case 2:
+		setImage(transparent, playerUI->livesImage2);
+		break;
+
+	case 1:
+		setImage(transparent, playerUI->livesImage1);
+		break;
+
+	case 0:
+		//Game Over
+		break;
+	}
+
+	--livesRemaining;
 }
 
 void APlayerBase::setImage(UTexture2D* desiredTexture, UImage* ImageToSet)
@@ -231,6 +307,7 @@ void APlayerBase::setImage(UTexture2D* desiredTexture, UImage* ImageToSet)
 	if (playerUI == nullptr) return;
 	FSlateBrush brush;
 	brush.SetResourceObject(desiredTexture);
-	brush.SetImageSize(FVector2D(120, 120));
+	brush.SetImageSize(FVector2D(160, 200));
+	if(ImageToSet == playerUI->respawnImage) brush.SetImageSize(FVector2D(2000, 1200));
 	ImageToSet->SetBrush(brush);
 }

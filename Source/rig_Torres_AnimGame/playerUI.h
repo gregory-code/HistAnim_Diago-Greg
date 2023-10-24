@@ -43,4 +43,10 @@ public:
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget), Category = "Widget Component")
 		UImage* livesImage3;
+
+	UPROPERTY(EditAnywhere, meta = (BindWidget), Category = "Widget Component")
+		UOverlay* respawnOverlay;
+
+	UPROPERTY(EditAnywhere, meta = (BindWidget), Category = "Widget Component")
+		UImage* respawnImage;
 };

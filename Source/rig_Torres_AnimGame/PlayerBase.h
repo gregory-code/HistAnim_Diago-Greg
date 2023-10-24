@@ -37,8 +37,14 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "UI")
 		UCanvasPanelSlot* pointsOverlaySlot;
 
+	UPROPERTY(BlueprintReadWrite, Category = "UI")
+		UCanvasPanelSlot* respawnOverlaySlot;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
 		UAnimMontage* M_jump;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
+		UAnimMontage* M_death;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 		USpringArmComponent* cameraBoom;
@@ -62,10 +68,19 @@ public:
 		UTexture2D* lifeIconBlackandWhite;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "PNGs")
+		UTexture2D* transparent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "PNGs")
 		UTexture2D* foodIcon;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "PNGs")
 		UTexture2D* foodIconBlackandWhite;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "PNGs")
+		UTexture2D* respawnTransition;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "PNGs")
+		UTexture2D* respawnBlackandWhiteTransition;
 
 	//Inputs
 	UPROPERTY(EditAnywhere, Category = "Input")
@@ -91,10 +106,19 @@ public:
 	void bounceOffEnemy();
 	void addPoints(int pointsToAdd);
 	void finishedAddingPoints();
+	void death();
 	void respawn();
+	void hideScreen();
+	void finishRespawn();
+	void loseLife();
 	void setImage(UTexture2D* desiredTexture, UImage* ImageToSet);
 
 	bool bWorldIs2D	{false};
+	bool bRespawnTransition{ false };
+	bool bExitScreenRight{ false };
+	bool bDying{ false };
+
+	int livesRemaining{ 3 };
 
 	int points;
 
