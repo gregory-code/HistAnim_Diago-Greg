@@ -308,6 +308,6 @@ void APlayerBase::setImage(UTexture2D* desiredTexture, UImage* ImageToSet)
 	FSlateBrush brush;
 	brush.SetResourceObject(desiredTexture);
 	brush.SetImageSize(FVector2D(160, 200));
-	if(ImageToSet == playerUI->respawnImage) brush.SetImageSize(FVector2D(2000, 1200));
+	if(ImageToSet == playerUI->respawnImage) brush.SetImageSize(FVector2D(2000, 1300));
 	ImageToSet->SetBrush(brush);
 }
