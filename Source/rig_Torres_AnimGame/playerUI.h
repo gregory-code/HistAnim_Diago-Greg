@@ -21,9 +21,6 @@ class RIG_TORRES_ANIMGAME_API UplayerUI : public UUserWidget
 public:
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget), Category = "Widget Component")
-		UOverlay* menuOverlay;
-
-	UPROPERTY(EditAnywhere, meta = (BindWidget), Category = "Widget Component")
 		UOverlay* pointsOverlay;
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget), Category = "Widget Component")
@@ -49,4 +46,16 @@ public:
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget), Category = "Widget Component")
 		UImage* respawnImage;
+
+	UPROPERTY(EditAnywhere, meta = (BindWidget), Category = "Widget Component")
+		UOverlay* timerOverlay;
+
+	UPROPERTY(EditAnywhere, meta = (BindWidget), Category = "Widget Component")
+		UTextBlock* timerText;
+
+	UPROPERTY(EditAnywhere, meta = (BindWidget), Category = "Widget Component")
+		UOverlay* controlsOverlay;
+
+	UPROPERTY(EditAnywhere, meta = (BindWidget), Category = "Widget Component")
+		UOverlay* menuPauseOverlay;
 };

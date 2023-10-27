@@ -42,17 +42,24 @@ APlayerBase::APlayerBase()
 void APlayerBase::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	PrimaryActorTick.bTickEvenWhenPaused = true;
+	menuAction->bTriggerWhenPaused = true;
 
+	time = 200;
 	points = 0;
 
 	if (!playerUI) return;
 	playerUI->AddToViewport();
 
+	GetWorld()->GetTimerManager().SetTimer(TimerTimerHandle, this, &APlayerBase::timerTick, 1, false);
+
 	playerUI->coinText->SetText(FText::FromString("Points: " + FString::FromInt(points)));
 
-	menuOverlaySlot = Cast<UCanvasPanelSlot>(playerUI->menuOverlay->Slot);
 	pointsOverlaySlot = Cast<UCanvasPanelSlot>(playerUI->pointsOverlay->Slot);
 	respawnOverlaySlot = Cast<UCanvasPanelSlot>(playerUI->respawnOverlay->Slot);
+	timerOverlaySlot = Cast<UCanvasPanelSlot>(playerUI->timerOverlay->Slot);
+	menuPauseOverlaySlot = Cast<UCanvasPanelSlot>(playerUI->menuPauseOverlay->Slot);
 
 	spawnPoint = GetActorLocation();
 
@@ -90,9 +97,14 @@ void APlayerBase::Tick(float DeltaTime)
 		SetActorLocation(lerp);
 	}
 
-	int pointsLerp = (bGainedPoints) ? FMath::Lerp(pointsOverlaySlot->GetPosition().Y, 210, 12 * DeltaTime) : FMath::Lerp(pointsOverlaySlot->GetPosition().Y, 250, 12 * DeltaTime);
-	pointsOverlaySlot->SetPosition(FVector2D(100, pointsLerp));
+	int pointsLerp = (bGainedPoints) ? FMath::Lerp(pointsOverlaySlot->GetPosition().Y, 180, 12 * DeltaTime) : FMath::Lerp(pointsOverlaySlot->GetPosition().Y, 200, 12 * DeltaTime);
+	pointsOverlaySlot->SetPosition(FVector2D(150, pointsLerp));
 
+	int timeLerp = (bTick) ? FMath::Lerp(timerOverlaySlot->GetPosition().X, -335, 12 * DeltaTime) : FMath::Lerp(timerOverlaySlot->GetPosition().X, -350, 12 * DeltaTime);
+	timerOverlaySlot->SetPosition(FVector2D(timeLerp, 50));
+
+	int menuLerp = (bOpenMenu) ? FMath::Lerp(menuPauseOverlaySlot->GetPosition().Y, 0, 16 * DeltaTime) : FMath::Lerp(menuPauseOverlaySlot->GetPosition().Y, 1110, 16 * DeltaTime);
+	menuPauseOverlaySlot->SetPosition(FVector2D(0, menuLerp));
 }
 
 
@@ -106,6 +118,7 @@ void APlayerBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		enhancedInputComponent->BindAction(lookAction, ETriggerEvent::Triggered, this, &APlayerBase::Look);
 		enhancedInputComponent->BindAction(jumpAction, ETriggerEvent::Started, this, &APlayerBase::Jump);
 		enhancedInputComponent->BindAction(switchAction, ETriggerEvent::Started, this, &APlayerBase::switchWorld);
+		enhancedInputComponent->BindAction(menuAction, ETriggerEvent::Started, this, &APlayerBase::menu);
 	}
 }
 
@@ -157,6 +170,16 @@ void APlayerBase::switchWorld()
 		changeCameraState();
 		changeRotationState();
 	}
+}
+
+void APlayerBase::menu()
+{
+	bOpenMenu = !bOpenMenu;
+	UGameplayStatics::SetGamePaused(GetWorld(), bOpenMenu);
+	GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(bOpenMenu);
+	
+	FInputModeGameOnly game;
+	GetWorld()->GetFirstPlayerController()->SetInputMode(game);
 }
 
 void APlayerBase::changeCameraState()
@@ -228,7 +251,7 @@ void APlayerBase::addPoints(int pointsToAdd)
 
 	bGainedPoints = true;
 
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &APlayerBase::finishedAddingPoints, 0.2f, false);
+	GetWorld()->GetTimerManager().SetTimer(PointsTimerHandle, this, &APlayerBase::finishedAddingPoints, 0.2f, false);
 }
 
 void APlayerBase::finishedAddingPoints()
@@ -250,7 +273,7 @@ void APlayerBase::death()
 	float montageLength = currentMontage->GetPlayLength();
 	montageLength -= 0.4f;
 
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &APlayerBase::respawn, montageLength, false);
+	GetWorld()->GetTimerManager().SetTimer(DeathTimerHandle, this, &APlayerBase::respawn, montageLength, false);
 }
 
 void APlayerBase::respawn()
@@ -259,7 +282,7 @@ void APlayerBase::respawn()
 
 	respawnOverlaySlot->SetPosition(FVector2D(-2000, 0));
 	bRespawnTransition = true;
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &APlayerBase::hideScreen, 1, false);
+	GetWorld()->GetTimerManager().SetTimer(DeathTimerHandle, this, &APlayerBase::hideScreen, 1, false);
 }
 
 void APlayerBase::hideScreen()
@@ -267,7 +290,7 @@ void APlayerBase::hideScreen()
 	loseLife();
 	bExitScreenRight = true;
 	SetActorLocation(spawnPoint);
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &APlayerBase::finishRespawn, 0.5f, false);
+	GetWorld()->GetTimerManager().SetTimer(DeathTimerHandle, this, &APlayerBase::finishRespawn, 0.5f, false);
 }
 
 void APlayerBase::finishRespawn()
@@ -302,12 +325,21 @@ void APlayerBase::loseLife()
 	--livesRemaining;
 }
 
+void APlayerBase::timerTick()
+{
+	bTick = !bTick;
+	if (playerUI == nullptr) return;
+	--time;
+	playerUI->timerText->SetText(FText::FromString("Time: " + FString::FromInt(time)));
+	GetWorld()->GetTimerManager().SetTimer(TimerTimerHandle, this, &APlayerBase::timerTick, 1.2f, false);
+}
+
 void APlayerBase::setImage(UTexture2D* desiredTexture, UImage* ImageToSet)
 {
 	if (playerUI == nullptr) return;
 	FSlateBrush brush;
 	brush.SetResourceObject(desiredTexture);
-	brush.SetImageSize(FVector2D(160, 200));
+	brush.SetImageSize(FVector2D(130, 130));
 	if(ImageToSet == playerUI->respawnImage) brush.SetImageSize(FVector2D(2000, 1300));
 	ImageToSet->SetBrush(brush);
 }

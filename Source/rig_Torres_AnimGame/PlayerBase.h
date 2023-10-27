@@ -32,13 +32,16 @@ public:
 		UplayerUI* playerUI;
 
 	UPROPERTY(BlueprintReadWrite, Category = "UI")
-		UCanvasPanelSlot* menuOverlaySlot;
-
-	UPROPERTY(BlueprintReadWrite, Category = "UI")
 		UCanvasPanelSlot* pointsOverlaySlot;
 
 	UPROPERTY(BlueprintReadWrite, Category = "UI")
+		UCanvasPanelSlot* timerOverlaySlot;
+
+	UPROPERTY(BlueprintReadWrite, Category = "UI")
 		UCanvasPanelSlot* respawnOverlaySlot;
+
+	UPROPERTY(BlueprintReadWrite, Category = "UI")
+		UCanvasPanelSlot* menuPauseOverlaySlot;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
 		UAnimMontage* M_jump;
@@ -96,11 +99,15 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 		UInputAction* jumpAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+		UInputAction* menuAction;
 	//This one is handled automatically using the character controller jump
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 		UInputAction* switchAction;
 	void switchWorld();
+	void menu();
 	void changeCameraState();
 	void changeRotationState();
 	void bounceOffEnemy();
@@ -111,22 +118,28 @@ public:
 	void hideScreen();
 	void finishRespawn();
 	void loseLife();
+	void timerTick();
 	void setImage(UTexture2D* desiredTexture, UImage* ImageToSet);
 
 	bool bWorldIs2D	{false};
 	bool bRespawnTransition{ false };
 	bool bExitScreenRight{ false };
 	bool bDying{ false };
+	bool bTick{ false };
+	bool bOpenMenu{ false };
 
 	int livesRemaining{ 3 };
 
+	int time{ 200 };
 	int points;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	FTimerHandle TimerHandle;
+	FTimerHandle PointsTimerHandle;
+	FTimerHandle TimerTimerHandle;
+	FTimerHandle DeathTimerHandle;
 	bool bGainedPoints {false};
 
 public:	

@@ -39,7 +39,9 @@ void AEnemyBase::BeginPlay()
 
 	startingLocation = GetActorLocation();
 
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AEnemyBase::delayedTick, 5, true);
+
+
+	GetWorld()->GetTimerManager().SetTimer(RoamTimerHandle, this, &AEnemyBase::delayedTick, FMath::RandRange(3, 7), false);
 }
 
 // Called every frame
@@ -122,7 +124,7 @@ void AEnemyBase::OnOverlapBegin(AActor* overlappedActor, AActor* otherActor)
 		float montageLength = currentMontage->GetPlayLength();
 		montageLength -= 0.4f;
 
-		GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AEnemyBase::deathPoof, montageLength, false);
+		GetWorld()->GetTimerManager().SetTimer(DeathTimerHandle, this, &AEnemyBase::deathPoof, montageLength, false);
 	}
 	else 
 	{
@@ -175,7 +177,7 @@ void AEnemyBase::noticesPlayer()
 	UAnimMontage* currentMontage = animInstance->GetCurrentActiveMontage();
 	float montageLength = currentMontage->GetPlayLength();
 
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AEnemyBase::unfreeze, montageLength, false);
+	GetWorld()->GetTimerManager().SetTimer(DeathTimerHandle, this, &AEnemyBase::unfreeze, montageLength, false);
 }
 
 void AEnemyBase::moveOnPath(FVector location)
@@ -192,7 +194,7 @@ void AEnemyBase::moveOnPath(FVector location)
 
 void AEnemyBase::deathPoof()
 {
-	float randomNumOfFruits = FMath::FRandRange(40.0f, 60.0f);
+	float randomNumOfFruits = FMath::FRandRange(1.0f, 5.0f);
 
 	for (int i = 0; i < randomNumOfFruits; ++i)
 	{
@@ -212,7 +214,7 @@ void AEnemyBase::deathPoof()
 			UPrimitiveComponent* spawnedFoodComponent = Cast<UPrimitiveComponent>(spawnedFood);
 			if (spawnedFoodComponent)
 			{
-				spawnedFoodComponent->AddImpulse(FMath::VRand() * 50, NAME_None, true);
+				spawnedFoodComponent->AddImpulse(FMath::VRand() * 20, NAME_None, true);
 			}
 		}
 	}
@@ -248,6 +250,8 @@ void AEnemyBase::switchWorld()
 
 void AEnemyBase::delayedTick()
 {
+	GetWorld()->GetTimerManager().SetTimer(RoamTimerHandle, this, &AEnemyBase::delayedTick, FMath::RandRange(1, 4), false);
+
 	if (bSeesPlayer == false)
 	{
 		bFaceLocation = true;

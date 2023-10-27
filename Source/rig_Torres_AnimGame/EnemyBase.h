@@ -48,7 +48,8 @@ protected:
 	UNavigationSystemV1* navSystem;
 	UNavigationPath* navPath;
 	UBoxComponent* hitBox;
-	FTimerHandle TimerHandle;
+	FTimerHandle DeathTimerHandle;
+	FTimerHandle RoamTimerHandle;
 	bool bFreezeMovement;
 	bool bFaceLocation;
 	bool bHasDied;
