@@ -11,7 +11,7 @@ AcheckPoint::AcheckPoint()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	grabBox = CreateDefaultSubobject<UBoxComponent>(TEXT("GrabBox"));
-	grabBox->SetBoxExtent(FVector(300, 300, 300));
+	grabBox->SetBoxExtent(FVector(600, 600, 600));
 }
 
 // Called when the game starts or when spawned
