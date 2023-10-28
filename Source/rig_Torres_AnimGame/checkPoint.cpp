@@ -32,7 +32,6 @@ void AcheckPoint::OnOverlapBegin(AActor* overlappedActor, AActor* otherActor)
 {
 	APlayerBase* player = Cast<APlayerBase>(otherActor);
 	if (!player) return;
-
 	player->setCheckPoint(GetActorLocation());
 }
 

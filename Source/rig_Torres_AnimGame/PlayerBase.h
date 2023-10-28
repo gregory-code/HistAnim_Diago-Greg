@@ -126,6 +126,7 @@ public:
 	void respawn();
 	void hideScreen();
 	void finishRespawn();
+	void changeToOrthographic();
 	void loseLife();
 	void timerTick();
 	void setCheckPoint(FVector newSpawnPoint);
@@ -160,6 +161,9 @@ public:
 	int time{ 200 };
 	int points;
 
+	int defaultCameraOrthoWidth;
+	int defaultCameraOrthoNearClipPlane;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -167,6 +171,7 @@ protected:
 	FTimerHandle PointsTimerHandle;
 	FTimerHandle TimerTimerHandle;
 	FTimerHandle DeathTimerHandle;
+	FTimerHandle ChangeTimerHandle;
 	bool bGainedPoints {false};
 
 public:	

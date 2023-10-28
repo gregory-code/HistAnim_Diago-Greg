@@ -43,6 +43,9 @@ void APlayerBase::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	defaultCameraOrthoNearClipPlane = followCamera->OrthoNearClipPlane;
+	defaultCameraOrthoWidth = followCamera->OrthoWidth;
+
 	PrimaryActorTick.bTickEvenWhenPaused = true;
 	menuAction->bTriggerWhenPaused = true;
 	
@@ -108,6 +111,18 @@ void APlayerBase::Tick(float DeltaTime)
 	{
 		FVector lerp = FMath::Lerp(GetActorLocation(), FVector(0, GetActorLocation().Y, GetActorLocation().Z), 5 * DeltaTime);
 		SetActorLocation(lerp);
+
+		followCamera->OrthoNearClipPlane = FMath::Lerp(followCamera->OrthoNearClipPlane, defaultCameraOrthoNearClipPlane, 10 * DeltaTime);
+		followCamera->OrthoWidth = FMath::Lerp(followCamera->OrthoWidth, defaultCameraOrthoWidth, 10 * DeltaTime);
+		followCamera->FieldOfView = FMath::Lerp(followCamera->FieldOfView, 125, 10 * DeltaTime);
+		cameraBoom->TargetArmLength = FMath::Lerp(cameraBoom->TargetArmLength, 800.0f, 10 * DeltaTime);
+	}
+	else
+	{
+		followCamera->OrthoNearClipPlane = FMath::Lerp(followCamera->OrthoNearClipPlane, 0, 10 * DeltaTime);
+		followCamera->OrthoWidth = FMath::Lerp(followCamera->OrthoWidth, 500, 10 * DeltaTime);
+		followCamera->FieldOfView = FMath::Lerp(followCamera->FieldOfView, 90, 10 * DeltaTime);
+		cameraBoom->TargetArmLength = FMath::Lerp(cameraBoom->TargetArmLength, 300.0f, 10 * DeltaTime);
 	}
 
 	int pointsLerp = (bGainedPoints) ? FMath::Lerp(pointsOverlaySlot->GetPosition().Y, 180, 12 * DeltaTime) : FMath::Lerp(pointsOverlaySlot->GetPosition().Y, 200, 12 * DeltaTime);
@@ -200,9 +215,10 @@ void APlayerBase::menu()
 
 void APlayerBase::changeCameraState()
 {
+	GetWorld()->GetTimerManager().SetTimer(ChangeTimerHandle, this, &APlayerBase::changeToOrthographic, 0.5f, false);
 	if (bWorldIs2D)
 	{
-		if(livesRemaining >= 1) setImage(lifeIconBlackandWhite, playerUI->livesImage1);
+		if (livesRemaining >= 1) setImage(lifeIconBlackandWhite, playerUI->livesImage1);
 		if (livesRemaining >= 2) setImage(lifeIconBlackandWhite, playerUI->livesImage2);
 		if (livesRemaining >= 3) setImage(lifeIconBlackandWhite, playerUI->livesImage3);
 
@@ -210,7 +226,7 @@ void APlayerBase::changeCameraState()
 
 		setImage(foodIconBlackandWhite, playerUI->coinImage);
 	}
-	else 
+	else
 	{
 		if (livesRemaining >= 1)setImage(lifeIcon, playerUI->livesImage1);
 		if (livesRemaining >= 2) setImage(lifeIcon, playerUI->livesImage2);
@@ -220,13 +236,14 @@ void APlayerBase::changeCameraState()
 
 		setImage(foodIcon, playerUI->coinImage);
 	}
-
 	cameraBoom->bUsePawnControlRotation = !bWorldIs2D; // Let's this control the camera rotation //  can also set this booleon in the blueprint editor
 	cameraBoom->bInheritPitch = !bWorldIs2D;
 	cameraBoom->bInheritRoll = !bWorldIs2D;
 	cameraBoom->bInheritYaw = !bWorldIs2D;
+}
 
-	cameraBoom->TargetArmLength = (bWorldIs2D) ? 800.0f : 300.0f ;
+void APlayerBase::changeToOrthographic()
+{
 
 	(bWorldIs2D) ? followCamera->SetProjectionMode(ECameraProjectionMode::Orthographic) : followCamera->SetProjectionMode(ECameraProjectionMode::Perspective);
 }
