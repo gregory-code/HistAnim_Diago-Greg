@@ -43,6 +43,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "UI")
 		UCanvasPanelSlot* menuPauseOverlaySlot;
 
+	UPROPERTY(BlueprintReadWrite, Category = "UI")
+		UCanvasPanelSlot* controlsOverlaySlot;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
 		UAnimMontage* M_jump;
 
@@ -104,8 +107,14 @@ public:
 		UInputAction* menuAction;
 	//This one is handled automatically using the character controller jump
 
+		UButton* respawnCheckpointButton;
+		UButton* restartLevelButton;
+		UButton* hideControlsButton;
+		UButton* toMainMenuButton;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 		UInputAction* switchAction;
+
 	void switchWorld();
 	void menu();
 	void changeCameraState();
@@ -119,6 +128,21 @@ public:
 	void finishRespawn();
 	void loseLife();
 	void timerTick();
+	void setCheckPoint(FVector newSpawnPoint);
+
+	UFUNCTION(BlueprintCallable, Category = "Input")
+	void respawnAtCheckpoint();
+
+	UFUNCTION(BlueprintCallable, Category = "Input")
+	void restartLevel();
+
+	UFUNCTION(BlueprintCallable, Category = "Input")
+	void toMainMenu();
+
+	UFUNCTION(BlueprintCallable, Category = "Input")
+	void hideControls();
+
+
 	void setImage(UTexture2D* desiredTexture, UImage* ImageToSet);
 
 	bool bWorldIs2D	{false};
@@ -127,6 +151,9 @@ public:
 	bool bDying{ false };
 	bool bTick{ false };
 	bool bOpenMenu{ false };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayerControls")
+	bool bHideControls;
 
 	int livesRemaining{ 3 };
 

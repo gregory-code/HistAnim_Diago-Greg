@@ -45,6 +45,10 @@ void APlayerBase::BeginPlay()
 	
 	PrimaryActorTick.bTickEvenWhenPaused = true;
 	menuAction->bTriggerWhenPaused = true;
+	
+
+	FInputModeGameOnly input;
+	GetWorld()->GetFirstPlayerController()->SetInputMode(input);
 
 	time = 200;
 	points = 0;
@@ -60,6 +64,9 @@ void APlayerBase::BeginPlay()
 	respawnOverlaySlot = Cast<UCanvasPanelSlot>(playerUI->respawnOverlay->Slot);
 	timerOverlaySlot = Cast<UCanvasPanelSlot>(playerUI->timerOverlay->Slot);
 	menuPauseOverlaySlot = Cast<UCanvasPanelSlot>(playerUI->menuPauseOverlay->Slot);
+	controlsOverlaySlot = Cast<UCanvasPanelSlot>(playerUI->controlsOverlay->Slot);
+
+	//UButton* button
 
 	spawnPoint = GetActorLocation();
 
@@ -83,6 +90,12 @@ void APlayerBase::Tick(float DeltaTime)
 	int respawnLerp = (bRespawnTransition) ? FMath::Lerp(respawnOverlaySlot->GetPosition().X, 0, 16 * DeltaTime) : FMath::Lerp(respawnOverlaySlot->GetPosition().X, -2000, 16 * DeltaTime);
 	if (bExitScreenRight) respawnLerp = FMath::Lerp(respawnOverlaySlot->GetPosition().X, 2000, 12 * DeltaTime);
 	respawnOverlaySlot->SetPosition(FVector2D(respawnLerp, 0));
+
+	int menuLerp = (bOpenMenu) ? FMath::Lerp(menuPauseOverlaySlot->GetPosition().Y, 0, 16 * DeltaTime) : FMath::Lerp(menuPauseOverlaySlot->GetPosition().Y, 1110, 16 * DeltaTime);
+	menuPauseOverlaySlot->SetPosition(FVector2D(0, menuLerp));
+
+	int controlsLerp = (bHideControls) ? FMath::Lerp(controlsOverlaySlot->GetPosition().Y, 700, 16 * DeltaTime) : FMath::Lerp(controlsOverlaySlot->GetPosition().Y, 460, 16 * DeltaTime);
+	controlsOverlaySlot->SetPosition(FVector2D(20, controlsLerp));
 	
 	if (bDying) return;
 
@@ -103,8 +116,6 @@ void APlayerBase::Tick(float DeltaTime)
 	int timeLerp = (bTick) ? FMath::Lerp(timerOverlaySlot->GetPosition().X, -335, 12 * DeltaTime) : FMath::Lerp(timerOverlaySlot->GetPosition().X, -350, 12 * DeltaTime);
 	timerOverlaySlot->SetPosition(FVector2D(timeLerp, 50));
 
-	int menuLerp = (bOpenMenu) ? FMath::Lerp(menuPauseOverlaySlot->GetPosition().Y, 0, 16 * DeltaTime) : FMath::Lerp(menuPauseOverlaySlot->GetPosition().Y, 1110, 16 * DeltaTime);
-	menuPauseOverlaySlot->SetPosition(FVector2D(0, menuLerp));
 }
 
 
@@ -174,9 +185,14 @@ void APlayerBase::switchWorld()
 
 void APlayerBase::menu()
 {
+	if (bDying) return;
+
+
 	bOpenMenu = !bOpenMenu;
 	UGameplayStatics::SetGamePaused(GetWorld(), bOpenMenu);
 	GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(bOpenMenu);
+
+	GetWorld()->GetFirstPlayerController()->bEnableClickEvents = true;
 	
 	FInputModeGameOnly game;
 	GetWorld()->GetFirstPlayerController()->SetInputMode(game);
@@ -330,8 +346,40 @@ void APlayerBase::timerTick()
 	bTick = !bTick;
 	if (playerUI == nullptr) return;
 	--time;
+	if (time <= 0) time = 0;
 	playerUI->timerText->SetText(FText::FromString("Time: " + FString::FromInt(time)));
 	GetWorld()->GetTimerManager().SetTimer(TimerTimerHandle, this, &APlayerBase::timerTick, 1.2f, false);
+}
+
+void APlayerBase::setCheckPoint(FVector newSpawnPoint)
+{
+	spawnPoint = newSpawnPoint;
+}
+
+void APlayerBase::respawnAtCheckpoint()
+{
+	menu();
+	death();
+}
+
+void APlayerBase::restartLevel()
+{
+	menu();
+	UGameplayStatics::OpenLevel(GetWorld(), "mainLevel");
+}
+
+void APlayerBase::toMainMenu()
+{
+	menu();
+	// make sure to send the player to main menu
+}
+
+void APlayerBase::hideControls()
+{
+	bHideControls = !bHideControls;
+	if (playerUI == nullptr) return;
+	if (bHideControls) playerUI->hideControlsText->SetText(FText::FromString("Show Controls"));
+	if (!bHideControls) playerUI->hideControlsText->SetText(FText::FromString("Hide Controls"));
 }
 
 void APlayerBase::setImage(UTexture2D* desiredTexture, UImage* ImageToSet)

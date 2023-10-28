@@ -58,4 +58,7 @@ public:
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget), Category = "Widget Component")
 		UOverlay* menuPauseOverlay;
+
+	UPROPERTY(EditAnywhere, meta = (BindWidget), Category = "Widget Component")
+		UTextBlock* hideControlsText;
 };
