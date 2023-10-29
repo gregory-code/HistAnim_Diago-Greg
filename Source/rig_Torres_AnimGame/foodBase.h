@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Sound/SoundWave.h"
 #include "Components/BoxComponent.h"
 #include "foodBase.generated.h"
 
@@ -28,7 +29,13 @@ protected:
 		UStaticMeshComponent* pickupMesh;
 
 	UPROPERTY(EditAnywhere, Category = "Food Details")
+		USoundWave* collectSound;
+
+	UPROPERTY(EditAnywhere, Category = "Food Details")
 		bool bSpawnWithPhysics;
+
+	UPROPERTY(EditAnywhere, Category = "Food Details")
+		bool bUnaffectedBy2D;
 
 	UPROPERTY(EditAnywhere, Category = "Food Details")
 		int pointsToGive{1};

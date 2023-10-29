@@ -8,6 +8,7 @@
 #include "rig_Torres_AnimGameGameModeBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "Styling/SlateBrush.h"
+#include "Components/AudioComponent.h"
 #include "Engine/Texture2D.h"
 #include "playerUI.h"
 #include "Engine/World.h"
@@ -68,10 +69,16 @@ void APlayerBase::BeginPlay()
 	timerOverlaySlot = Cast<UCanvasPanelSlot>(playerUI->timerOverlay->Slot);
 	menuPauseOverlaySlot = Cast<UCanvasPanelSlot>(playerUI->menuPauseOverlay->Slot);
 	controlsOverlaySlot = Cast<UCanvasPanelSlot>(playerUI->controlsOverlay->Slot);
+	gameOverOverlaySlot = Cast<UCanvasPanelSlot>(playerUI->gameOverOverlay->Slot);
 
 	//UButton* button
 
 	spawnPoint = GetActorLocation();
+
+	pirateSong = UGameplayStatics::SpawnSound2D(GetWorld(), pirateBop, 1.0f, 1.0f, 0.0f);
+	pirateBackground = UGameplayStatics::SpawnSound2D(GetWorld(), pirateWaves, 1.0f, 1.0f, 0.0f);
+	cartoonSong = UGameplayStatics::SpawnSound2D(GetWorld(), cartoonBop, 1.0f, 1.0f, 0.0f);
+	//cartoonBackground = UGameplayStatics::SpawnSound2D(GetWorld(), cartoonStatic, 1.0f, 1.0f, 0.0f);
 
 	changeCameraState();
 	
@@ -99,6 +106,9 @@ void APlayerBase::Tick(float DeltaTime)
 
 	int controlsLerp = (bHideControls) ? FMath::Lerp(controlsOverlaySlot->GetPosition().Y, 700, 16 * DeltaTime) : FMath::Lerp(controlsOverlaySlot->GetPosition().Y, 460, 16 * DeltaTime);
 	controlsOverlaySlot->SetPosition(FVector2D(20, controlsLerp));
+
+	int gameOverLerp = (bGameOver) ? FMath::Lerp(gameOverOverlaySlot->GetPosition().Y, 0, 16 * DeltaTime) : FMath::Lerp(gameOverOverlaySlot->GetPosition().Y, -1100, 16 * DeltaTime);
+	gameOverOverlaySlot->SetPosition(FVector2D(0, gameOverLerp));
 	
 	if (bDying) return;
 
@@ -116,6 +126,14 @@ void APlayerBase::Tick(float DeltaTime)
 		followCamera->OrthoWidth = FMath::Lerp(followCamera->OrthoWidth, defaultCameraOrthoWidth, 10 * DeltaTime);
 		followCamera->FieldOfView = FMath::Lerp(followCamera->FieldOfView, 125, 10 * DeltaTime);
 		cameraBoom->TargetArmLength = FMath::Lerp(cameraBoom->TargetArmLength, 800.0f, 10 * DeltaTime);
+
+		cartoonLerp = FMath::Lerp(cartoonLerp, 1.2f, 8 * DeltaTime);
+		cartoonSong->SetVolumeMultiplier(cartoonLerp);
+		//cartoonBackground->SetVolumeMultiplier(cartoonLerp);
+
+		pirateLerp = FMath::Lerp(pirateLerp, 0.1f, 8 * DeltaTime);
+		pirateSong->SetVolumeMultiplier(pirateLerp);
+		pirateBackground->SetVolumeMultiplier(pirateLerp);
 	}
 	else
 	{
@@ -123,6 +141,14 @@ void APlayerBase::Tick(float DeltaTime)
 		followCamera->OrthoWidth = FMath::Lerp(followCamera->OrthoWidth, 500, 10 * DeltaTime);
 		followCamera->FieldOfView = FMath::Lerp(followCamera->FieldOfView, 90, 10 * DeltaTime);
 		cameraBoom->TargetArmLength = FMath::Lerp(cameraBoom->TargetArmLength, 300.0f, 10 * DeltaTime);
+
+		cartoonLerp = FMath::Lerp(cartoonLerp, 0.1f, 8 * DeltaTime);
+		cartoonSong->SetVolumeMultiplier(cartoonLerp);
+		//cartoonBackground->SetVolumeMultiplier(cartoonLerp);
+
+		pirateLerp = FMath::Lerp(pirateLerp, 1, 8 * DeltaTime);
+		pirateSong->SetVolumeMultiplier(pirateLerp);
+		pirateBackground->SetVolumeMultiplier(pirateLerp);
 	}
 
 	int pointsLerp = (bGainedPoints) ? FMath::Lerp(pointsOverlaySlot->GetPosition().Y, 180, 12 * DeltaTime) : FMath::Lerp(pointsOverlaySlot->GetPosition().Y, 200, 12 * DeltaTime);
@@ -143,6 +169,7 @@ void APlayerBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		enhancedInputComponent->BindAction(moveAction, ETriggerEvent::Triggered, this, &APlayerBase::MoveCharacter);
 		enhancedInputComponent->BindAction(lookAction, ETriggerEvent::Triggered, this, &APlayerBase::Look);
 		enhancedInputComponent->BindAction(jumpAction, ETriggerEvent::Started, this, &APlayerBase::Jump);
+		enhancedInputComponent->BindAction(jumpAction, ETriggerEvent::Started, this, &APlayerBase::fakeJump);
 		enhancedInputComponent->BindAction(switchAction, ETriggerEvent::Started, this, &APlayerBase::switchWorld);
 		enhancedInputComponent->BindAction(menuAction, ETriggerEvent::Started, this, &APlayerBase::menu);
 	}
@@ -187,6 +214,17 @@ void APlayerBase::switchWorld()
 	if (bDying) return;
 	if (GetCharacterMovement()->IsFalling()) return;
 
+	bDying = true;
+
+	if (bWorldIs2D)
+	{
+		PlayAnimMontage(M_Tran2D, 1, NAME_None);
+	}
+	else
+	{
+		PlayAnimMontage(M_Tran3D, 1, NAME_None);
+	}
+
 	Arig_Torres_AnimGameGameModeBase* customGameMode = Cast<Arig_Torres_AnimGameGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
 
 	if(customGameMode)
@@ -197,6 +235,33 @@ void APlayerBase::switchWorld()
 		changeRotationState();
 		switchWorldAnim();
 	}
+}
+
+void APlayerBase::fakeJump()
+{
+	USkeletalMeshComponent* skeletalMeshComponent = this->FindComponentByClass<USkeletalMeshComponent>();
+	UAnimInstance* animInstance = skeletalMeshComponent->GetAnimInstance();
+	UplayerAnimInstance* playerAnim = Cast<UplayerAnimInstance>(animInstance);
+	if (playerAnim) playerAnim->setJumpActionBool(true);
+
+	if (bWorldIs2D)
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), blackwhiteJump, 1.0f, 1.0f, 0.0f);
+	}
+	else
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), colorJump, 1.0f, 1.0f, 0.0f);
+	}
+
+	GetWorld()->GetTimerManager().SetTimer(ChangeTimerHandle, this, &APlayerBase::finishFakeJump, 0.1f, false);
+}
+
+void APlayerBase::finishFakeJump()
+{
+	USkeletalMeshComponent* skeletalMeshComponent = this->FindComponentByClass<USkeletalMeshComponent>();
+	UAnimInstance* animInstance = skeletalMeshComponent->GetAnimInstance();
+	UplayerAnimInstance* playerAnim = Cast<UplayerAnimInstance>(animInstance);
+	if (playerAnim) playerAnim->setJumpActionBool(false);
 }
 
 void APlayerBase::menu()
@@ -245,7 +310,7 @@ void APlayerBase::changeCameraState()
 
 void APlayerBase::changeToOrthographic()
 {
-
+	bDying = false;
 	(bWorldIs2D) ? followCamera->SetProjectionMode(ECameraProjectionMode::Orthographic) : followCamera->SetProjectionMode(ECameraProjectionMode::Perspective);
 }
 
@@ -328,6 +393,15 @@ void APlayerBase::respawn()
 	if (playerUI == nullptr) return;
 
 	respawnOverlaySlot->SetPosition(FVector2D(-2000, 0));
+	if (bWorldIs2D) 
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), blackwhiteVoidOut, 1.0f, 1.0f, 0.0f);
+	}
+	else 
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), colorVoidOut, 1.0f, 1.0f, 0.0f);
+	}
+	
 	bRespawnTransition = true;
 	GetWorld()->GetTimerManager().SetTimer(DeathTimerHandle, this, &APlayerBase::hideScreen, 1, false);
 }
@@ -365,6 +439,13 @@ void APlayerBase::loseLife()
 		break;
 
 	case 0:
+		bDying = true;
+		bGameOver = true;
+		UGameplayStatics::SetGamePaused(GetWorld(), true);
+		GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
+		GetWorld()->GetFirstPlayerController()->bEnableClickEvents = true;
+		FInputModeGameOnly game;
+		GetWorld()->GetFirstPlayerController()->SetInputMode(game);
 		//Game Over
 		break;
 	}

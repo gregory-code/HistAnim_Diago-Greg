@@ -14,6 +14,7 @@
 #include "Components/Widget.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Components/SceneCaptureComponent2D.h"
+#include "Sound/SoundWave.h"
 #include "Engine/Texture2D.h"
 #include "Components/Overlayslot.h"
 #include "Components/InputComponent.h"
@@ -47,6 +48,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "UI")
 		UCanvasPanelSlot* controlsOverlaySlot;
 
+	UPROPERTY(BlueprintReadWrite, Category = "UI")
+		UCanvasPanelSlot* gameOverOverlaySlot;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
 		UAnimMontage* M_jump2D;
 
@@ -58,6 +62,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
 		UAnimMontage* M_death3D;
+
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
+		UAnimMontage* M_Tran2D;
+
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
+		UAnimMontage* M_Tran3D;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 		USpringArmComponent* cameraBoom;
@@ -122,7 +132,49 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 		UInputAction* switchAction;
 
+	UPROPERTY(EditAnywhere, Category = "Food Details")
+		USoundWave* blackwhiteVoidOut;
+
+	UPROPERTY(EditAnywhere, Category = "Food Details")
+		USoundWave* colorVoidOut;
+
+		UPROPERTY(EditAnywhere, Category = "Food Details")
+		USoundWave* blackwhiteJump;
+
+		UPROPERTY(EditAnywhere, Category = "Food Details")
+		USoundWave* colorJump;
+
+		UPROPERTY(EditAnywhere, Category = "Food Details")
+		USoundWave* cartoonBop;
+
+		UPROPERTY(EditAnywhere, Category = "Food Details")
+		USoundWave* cartoonStatic;
+
+		UPROPERTY(EditAnywhere, Category = "Food Details")
+		USoundWave* pirateBop;
+
+		UPROPERTY(EditAnywhere, Category = "Food Details")
+		USoundWave* pirateWaves;
+
+		UPROPERTY(EditAnywhere, Category = "Food Details")
+		UAudioComponent* cartoonSong;
+
+		UPROPERTY(EditAnywhere, Category = "Food Details")
+		UAudioComponent* cartoonBackground;
+
+		float cartoonLerp;
+
+		UPROPERTY(EditAnywhere, Category = "Food Details")
+		UAudioComponent* pirateSong;
+
+		UPROPERTY(EditAnywhere, Category = "Food Details")
+		UAudioComponent* pirateBackground;
+
+		float pirateLerp;
+
 	void switchWorld();
+	void fakeJump();
+	void finishFakeJump();
 	void menu();
 	void changeCameraState();
 	void changeRotationState();
@@ -160,6 +212,7 @@ public:
 	bool bDying{ false };
 	bool bTick{ false };
 	bool bOpenMenu{ false };
+	bool bGameOver{ false };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayerControls")
 	bool bHideControls;
@@ -180,6 +233,7 @@ protected:
 	FTimerHandle TimerTimerHandle;
 	FTimerHandle DeathTimerHandle;
 	FTimerHandle ChangeTimerHandle;
+	FTimerHandle JumpTimerHandle;
 	bool bGainedPoints {false};
 
 public:	

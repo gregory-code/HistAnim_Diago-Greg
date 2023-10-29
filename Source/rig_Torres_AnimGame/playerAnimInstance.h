@@ -19,6 +19,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Custom Animation")
 	void setWorldis2DBool(bool state);
 
+	UFUNCTION(BlueprintCallable, Category = "Custom Animation")
+	void setJumpActionBool(bool state);
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom Animation")
 		bool bWorldIs2D;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom Animation")
+		bool bJumpAction;
 };

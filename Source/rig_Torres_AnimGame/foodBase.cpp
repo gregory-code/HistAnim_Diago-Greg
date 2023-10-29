@@ -45,12 +45,12 @@ void AfoodBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (bWorldIs2D)
+	if (bWorldIs2D && bUnaffectedBy2D == false)
 	{
 		FVector lerp = FMath::Lerp(GetActorLocation(), FVector(0, GetActorLocation().Y, GetActorLocation().Z), 5 * DeltaTime);
 		SetActorLocation(lerp);
 	}
-	else
+	else if (bWorldIs2D == false)
 	{
 
 		if (isActive)
@@ -69,6 +69,7 @@ void AfoodBase::OnOverlapBegin(AActor* overlappedActor, AActor* otherActor)
 	APlayerBase* player = Cast<APlayerBase>(otherActor);
 	if (!player) return;
 
+	UGameplayStatics::PlaySound2D(GetWorld(), collectSound, 1.0f, 1.0f, 0.0f);
 	player->addPoints(pointsToGive);
 	Destroy();
 }

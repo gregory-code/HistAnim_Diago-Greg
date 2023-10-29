@@ -33,6 +33,9 @@ public:
 		UOverlay* livesOverlay;
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget), Category = "Widget Component")
+		UOverlay* gameOverOverlay;
+
+	UPROPERTY(EditAnywhere, meta = (BindWidget), Category = "Widget Component")
 		UImage* livesImage1;
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget), Category = "Widget Component")
