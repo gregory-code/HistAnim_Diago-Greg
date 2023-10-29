@@ -70,6 +70,7 @@ void APlayerBase::BeginPlay()
 	menuPauseOverlaySlot = Cast<UCanvasPanelSlot>(playerUI->menuPauseOverlay->Slot);
 	controlsOverlaySlot = Cast<UCanvasPanelSlot>(playerUI->controlsOverlay->Slot);
 	gameOverOverlaySlot = Cast<UCanvasPanelSlot>(playerUI->gameOverOverlay->Slot);
+	winOverlaySlot = Cast<UCanvasPanelSlot>(playerUI->winOverlay->Slot);
 
 	//UButton* button
 
@@ -109,6 +110,9 @@ void APlayerBase::Tick(float DeltaTime)
 
 	int gameOverLerp = (bGameOver) ? FMath::Lerp(gameOverOverlaySlot->GetPosition().Y, 0, 16 * DeltaTime) : FMath::Lerp(gameOverOverlaySlot->GetPosition().Y, -1100, 16 * DeltaTime);
 	gameOverOverlaySlot->SetPosition(FVector2D(0, gameOverLerp));
+
+	int winLerp = (bWon) ? FMath::Lerp(winOverlaySlot->GetPosition().Y, 0, 16 * DeltaTime) : FMath::Lerp(winOverlaySlot->GetPosition().Y, -1100, 16 * DeltaTime);
+	winOverlaySlot->SetPosition(FVector2D(0, winLerp));
 	
 	if (bDying) return;
 
@@ -469,6 +473,26 @@ void APlayerBase::switchWorldAnim()
 	UAnimInstance* animInstance = skeletalMeshComponent->GetAnimInstance();
 	UplayerAnimInstance* playerAnim = Cast<UplayerAnimInstance>(animInstance);
 	if (playerAnim) playerAnim->setWorldis2DBool(bWorldIs2D);
+}
+
+void APlayerBase::wonGame()
+{
+	bDying = true;
+	bWon = true;
+
+	UGameplayStatics::SetGamePaused(GetWorld(), true);
+	GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
+	GetWorld()->GetFirstPlayerController()->bEnableClickEvents = true;
+	FInputModeGameOnly game;
+	GetWorld()->GetFirstPlayerController()->SetInputMode(game);
+
+	if (playerUI == nullptr) return;
+
+	playerUI->pointsBonusText->SetText(FText::FromString("Points: " + FString::FromInt(points)));
+	float timeBonusFloat = time / 2;
+	int timeBonus = FMath::RoundToInt(timeBonusFloat);
+	playerUI->timeBonusText->SetText(FText::FromString("Time Bonus: " + FString::FromInt(timeBonus)));
+	playerUI->totalPoinstText->SetText(FText::FromString("Total Points: " + FString::FromInt(points + timeBonus)));
 }
 
 void APlayerBase::setCheckPoint(FVector newSpawnPoint)

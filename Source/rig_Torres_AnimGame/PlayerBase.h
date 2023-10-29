@@ -51,6 +51,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "UI")
 		UCanvasPanelSlot* gameOverOverlaySlot;
 
+	UPROPERTY(BlueprintReadWrite, Category = "UI")
+		UCanvasPanelSlot* winOverlaySlot;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
 		UAnimMontage* M_jump2D;
 
@@ -189,6 +192,7 @@ public:
 	void loseLife();
 	void timerTick();
 	void switchWorldAnim();
+	void wonGame();
 	void setCheckPoint(FVector newSpawnPoint);
 
 	UFUNCTION(BlueprintCallable, Category = "Input")
@@ -213,6 +217,7 @@ public:
 	bool bTick{ false };
 	bool bOpenMenu{ false };
 	bool bGameOver{ false };
+	bool bWon{ false };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayerControls")
 	bool bHideControls;

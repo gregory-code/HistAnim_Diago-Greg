@@ -63,5 +63,17 @@ public:
 		UOverlay* menuPauseOverlay;
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget), Category = "Widget Component")
+		UOverlay* winOverlay;
+
+		UPROPERTY(EditAnywhere, meta = (BindWidget), Category = "Widget Component")
+		UTextBlock* pointsBonusText;
+
+		UPROPERTY(EditAnywhere, meta = (BindWidget), Category = "Widget Component")
+		UTextBlock* timeBonusText;
+
+		UPROPERTY(EditAnywhere, meta = (BindWidget), Category = "Widget Component")
+		UTextBlock* totalPoinstText;
+
+	UPROPERTY(EditAnywhere, meta = (BindWidget), Category = "Widget Component")
 		UTextBlock* hideControlsText;
 };
