@@ -10,6 +10,7 @@
 #include "playerUI.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/StaticMeshComponent.h"
+#include "playerAnimInstance.h"
 #include "Components/Widget.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Components/SceneCaptureComponent2D.h"
@@ -47,10 +48,16 @@ public:
 		UCanvasPanelSlot* controlsOverlaySlot;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
-		UAnimMontage* M_jump;
+		UAnimMontage* M_jump2D;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
-		UAnimMontage* M_death;
+		UAnimMontage* M_jump3D;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
+		UAnimMontage* M_death2D;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
+		UAnimMontage* M_death3D;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 		USpringArmComponent* cameraBoom;
@@ -129,6 +136,7 @@ public:
 	void changeToOrthographic();
 	void loseLife();
 	void timerTick();
+	void switchWorldAnim();
 	void setCheckPoint(FVector newSpawnPoint);
 
 	UFUNCTION(BlueprintCallable, Category = "Input")

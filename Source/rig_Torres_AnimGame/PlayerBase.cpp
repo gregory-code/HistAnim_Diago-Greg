@@ -195,6 +195,7 @@ void APlayerBase::switchWorld()
 		bWorldIs2D = !bWorldIs2D;
 		changeCameraState();
 		changeRotationState();
+		switchWorldAnim();
 	}
 }
 
@@ -266,8 +267,14 @@ void APlayerBase::changeRotationState()
 void APlayerBase::bounceOffEnemy()
 {
 	addPoints(1);
-
-	PlayAnimMontage(M_jump, 1, NAME_None);
+	if (bWorldIs2D)
+	{
+		PlayAnimMontage(M_jump2D, 1, NAME_None);
+	}
+	else
+	{
+		PlayAnimMontage(M_jump3D, 1, NAME_None);
+	}
 
 	FVector jumpDirection = FVector(0, 0, 1);
 	float jumpVelocity = 950;
@@ -298,7 +305,14 @@ void APlayerBase::death()
 
 	bDying = true;
 
-	PlayAnimMontage(M_death, 1, NAME_None);
+	if (bWorldIs2D)
+	{
+		PlayAnimMontage(M_death2D, 1, NAME_None);
+	}
+	else
+	{
+		PlayAnimMontage(M_death3D, 1, NAME_None);
+	}
 
 	USkeletalMeshComponent* skeletalMeshComponent = this->FindComponentByClass<USkeletalMeshComponent>();
 	UAnimInstance* animInstance = skeletalMeshComponent->GetAnimInstance();
@@ -368,6 +382,14 @@ void APlayerBase::timerTick()
 	GetWorld()->GetTimerManager().SetTimer(TimerTimerHandle, this, &APlayerBase::timerTick, 1.2f, false);
 }
 
+void APlayerBase::switchWorldAnim()
+{
+	USkeletalMeshComponent* skeletalMeshComponent = this->FindComponentByClass<USkeletalMeshComponent>();
+	UAnimInstance* animInstance = skeletalMeshComponent->GetAnimInstance();
+	UplayerAnimInstance* playerAnim = Cast<UplayerAnimInstance>(animInstance);
+	if (playerAnim) playerAnim->setWorldis2DBool(bWorldIs2D);
+}
+
 void APlayerBase::setCheckPoint(FVector newSpawnPoint)
 {
 	spawnPoint = newSpawnPoint;
@@ -388,7 +410,7 @@ void APlayerBase::restartLevel()
 void APlayerBase::toMainMenu()
 {
 	menu();
-	// make sure to send the player to main menu
+	UGameplayStatics::OpenLevel(GetWorld(), "mainMenu");
 }
 
 void APlayerBase::hideControls()
