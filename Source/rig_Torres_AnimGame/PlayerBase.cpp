@@ -54,7 +54,7 @@ void APlayerBase::BeginPlay()
 	FInputModeGameOnly input;
 	GetWorld()->GetFirstPlayerController()->SetInputMode(input);
 
-	time = 200;
+	time = 300;
 	points = 0;
 
 	if (!playerUI) return;
@@ -415,6 +415,7 @@ void APlayerBase::hideScreen()
 	loseLife();
 	bExitScreenRight = true;
 	SetActorLocation(spawnPoint);
+	if (checkPointRef != nullptr) SetActorLocation(checkPointRef->GetActorLocation());
 	GetWorld()->GetTimerManager().SetTimer(DeathTimerHandle, this, &APlayerBase::finishRespawn, 0.5f, false);
 }
 
@@ -495,9 +496,10 @@ void APlayerBase::wonGame()
 	playerUI->totalPoinstText->SetText(FText::FromString("Total Points: " + FString::FromInt(points + timeBonus)));
 }
 
-void APlayerBase::setCheckPoint(FVector newSpawnPoint)
+void APlayerBase::setCheckPoint(AActor* newSpawnPoint)
 {
-	spawnPoint = newSpawnPoint;
+	checkPointRef = newSpawnPoint;
+	spawnPoint = newSpawnPoint->GetActorLocation();
 }
 
 void APlayerBase::respawnAtCheckpoint()

@@ -55,7 +55,7 @@ void AEnemyBase::Tick(float DeltaTime)
 		SetActorLocation(lerp);
 	}
 	
-	if (bFaceLocation) 
+	if (bFaceLocation && bHasDied == false) 
 	{
 		if (worldIs2D)
 		{
@@ -194,7 +194,7 @@ void AEnemyBase::moveOnPath(FVector location)
 
 void AEnemyBase::deathPoof()
 {
-	float randomNumOfFruits = FMath::FRandRange(1.0f, 5.0f);
+	float randomNumOfFruits = FMath::FRandRange(0.0f, 4.0f);
 
 	for (int i = 0; i < randomNumOfFruits; ++i)
 	{
@@ -260,13 +260,13 @@ void AEnemyBase::delayedTick()
 		if (worldIs2D == true)
 		{
 
-			navSystem->GetRandomReachablePointInRadius(startingLocation, getRadius(), targetLocation);
+			navSystem->GetRandomReachablePointInRadius(GetActorLocation(), getRadius(), targetLocation);
 			targetLocation.Location.X = 0;
 			moveOnPath(targetLocation.Location);
 		}
 		else if (worldIs2D == false)
 		{
-			navSystem->GetRandomReachablePointInRadius(startingLocation, getRadius(), targetLocation);
+			navSystem->GetRandomReachablePointInRadius(GetActorLocation(), getRadius(), targetLocation);
 			moveOnPath(targetLocation.Location);
 		}
 	}

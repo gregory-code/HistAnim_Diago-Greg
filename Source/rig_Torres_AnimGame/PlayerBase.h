@@ -108,6 +108,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "PNGs")
 		UTexture2D* respawnBlackandWhiteTransition;
 
+		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "help")
+		float help;
+
 	//Inputs
 	UPROPERTY(EditAnywhere, Category = "Input")
 		UInputMappingContext* mappingContext;
@@ -193,7 +196,7 @@ public:
 	void timerTick();
 	void switchWorldAnim();
 	void wonGame();
-	void setCheckPoint(FVector newSpawnPoint);
+	void setCheckPoint(AActor* newSpawnPoint);
 
 	UFUNCTION(BlueprintCallable, Category = "Input")
 	void respawnAtCheckpoint();
@@ -218,6 +221,7 @@ public:
 	bool bOpenMenu{ false };
 	bool bGameOver{ false };
 	bool bWon{ false };
+	AActor* checkPointRef;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayerControls")
 	bool bHideControls;
